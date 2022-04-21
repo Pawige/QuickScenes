@@ -4,10 +4,7 @@
   "displayName": "Quick Scenes",
   "description": "Tools for quicker scene loading.",
   "unity": "2021.1",
-  "dependencies": 
-  {
-	  "com.marijnzwemmer.unity-toolbar-extender" : "git+https://github.com/marijnz/unity-toolbar-extender.git"
-  },
+  "dependencies": {},
   "keywords": [
     "toolbar",
     "extender",
