@@ -29,6 +29,7 @@ namespace QuickScenes
 		{
 			_sceneFolders = Utility.GenerateSceneLists();
 			_sceneList = AssetDatabase.FindAssets("t:scene", new[] { "Assets/Scenes" });
+			titleContent = new GUIContent("Quick Scenes");
 		}
 
 		private void OnGUI()
