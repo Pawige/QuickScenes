@@ -1,0 +1,23 @@
+{
+  "name": "com.paulgerla.quickscenes",
+  "version": "1.0.0",
+  "displayName": "Quick Scenes",
+  "description": "Tools for quicker scene loading.",
+  "unity": "2021.1",
+  "dependencies": 
+  {
+	"com.marijnzwemmer.unity-toolbar-extender" : "https://github.com/marijnz/unity-toolbar-extender.git"
+  },
+  "keywords": [
+    "toolbar",
+    "extender",
+    "custom",
+    "UI",
+    "button"
+  ],
+  "author": {
+    "name": "Paul Gerla",
+    "email": "pawige@gmail.com",
+    "url": "https://github.com/Pawige/QuickScenes"
+  }
+}
