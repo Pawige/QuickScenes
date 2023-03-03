@@ -124,7 +124,7 @@ namespace QuickScenes
 
 					GUI.skin.button.fontStyle = FontStyle.Normal;
 					GUI.color = guiColor;
-					if (GUILayout.Button("Find", GUILayout.Width(35)))
+					if (GUILayout.Button("Find", GUILayout.Width(38)))
 					{
 						Selection.activeObject = AssetDatabase.LoadMainAssetAtPath(path);
 					}

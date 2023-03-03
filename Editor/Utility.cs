@@ -8,7 +8,7 @@ namespace QuickScenes
 	{
 		public static List<SceneFolder> GenerateSceneLists()
 		{
-			string[] sceneList = AssetDatabase.FindAssets("t:scene", new[] { "Assets/Scenes" });
+			string[] sceneList = AssetDatabase.FindAssets("t:scene", new[] { "Assets/" });
 			List<SceneFolder> sceneFolders = new List<SceneFolder>();
 
 			foreach (string sceneGuid in sceneList)

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using UnityToolbarExtender;
 
@@ -8,16 +9,20 @@ namespace QuickScenes
     static class ToolbarStyles
     {
         public static readonly GUIStyle commandButtonStyle;
+        public static readonly GUIStyle favoriteButtonStyle;
 
         static ToolbarStyles()
         {
             commandButtonStyle = new GUIStyle("DropDown")
             {
-                //alignment = TextAnchor.MiddleCenter,
-                //imagePosition = ImagePosition.ImageAbove,
-                //fontStyle = FontStyle.Bold,
                 fixedHeight = 20,
                 fixedWidth = 100
+            };
+            favoriteButtonStyle = new GUIStyle(GUI.skin.button)
+            {
+                fixedHeight = 20,
+                fixedWidth = 21,
+                padding = new RectOffset(4,3,4,4),
             };
         }
     }
@@ -25,47 +30,64 @@ namespace QuickScenes
     [InitializeOnLoad]
     public class ToolbarScenePicker
     {
-        private static GenericMenu _loadMenu;
-        private static GUIContent _loadDropdown = new GUIContent("Load Scene");
-        private static GUIContent _addDropdown = new GUIContent("Add Scene");
+        private static readonly GUIContent _loadDropdown = new GUIContent("Load Scene");
+        private static readonly GUIContent _addDropdown = new GUIContent("Add Scene");
+        private static GUIContent _favorite;
         private static bool _additiveLoad;
+        private static List<SceneFolder> _sceneList;
+        private static SceneSelectionDropdown _dropdownSelectionMenu;
 
         static ToolbarScenePicker()
         {
+            Texture star = (Texture)EditorGUIUtility.Load("Packages/com.paulgerla.quickscenes/Editor/Images/Refresh.tga");
+            _favorite = new GUIContent(star);
             ToolbarExtender.LeftToolbarGUI.Add(OnToolbarGUI);
             InitSceneMenu();
         }
 
         static void OnToolbarGUI()
         {
+            // Some ugly weird magic numbers in here but it works for now ¯\_(ツ)_/¯
+            var dropdownRect = new Rect
+            {
+                width = EditorGUIUtility.singleLineHeight * 15,
+                x = 0,
+                yMax = Screen.height - EditorGUIUtility.singleLineHeight * 1.25f
+            };
             if (EditorGUILayout.DropdownButton(_loadDropdown, FocusType.Keyboard, ToolbarStyles.commandButtonStyle))
             {
                 _additiveLoad = false;
-                _loadMenu.ShowAsContext();
+                AddDropdown(dropdownRect, "Load Scene");
             }
             if (EditorGUILayout.DropdownButton(_addDropdown, FocusType.Keyboard, ToolbarStyles.commandButtonStyle))
             {
                 _additiveLoad = true;
-                _loadMenu.ShowAsContext();
+                dropdownRect.x += ToolbarStyles.commandButtonStyle.fixedWidth;
+                AddDropdown(dropdownRect, "Add Scene");
             }
-            //GUILayout.FlexibleSpace();
+
+            if (GUILayout.Button(_favorite, ToolbarStyles.favoriteButtonStyle))
+            {
+                InitSceneMenu();
+            }
+        }
+        
+        private static void AddDropdown(Rect dropdownRect, string title)  
+        {  
+            _dropdownSelectionMenu = new SceneSelectionDropdown(new AdvancedDropdownState(), title, _sceneList);  
+            _dropdownSelectionMenu.SelectionMade += SelectionMade;  
+            _dropdownSelectionMenu.Show(dropdownRect);  
+        }  
+  
+        private static void SelectionMade(string selectedSceneGuid)  
+        {  
+            LoadSceneWithGuid(selectedSceneGuid);  
+            _dropdownSelectionMenu.SelectionMade -= SelectionMade;  
         }
         
         private static void InitSceneMenu()
         {
-            _loadMenu = new GenericMenu();
-            List<SceneFolder> sceneList = Utility.GenerateSceneLists();
-            foreach (SceneFolder sceneFolder in sceneList)
-            {
-                foreach (string sceneGuid in sceneFolder.SceneGuids)
-                {
-                    string path = AssetDatabase.GUIDToAssetPath(sceneGuid);
-                    string[] scenePathSplit = path.Split('/', '.');
-                    // Reminder: [^2] is the same as writing [scenePathSplit.Length - 2];
-                    string sceneName = scenePathSplit[^2];
-                    _loadMenu.AddItem(new GUIContent($"{sceneFolder.FolderName}/{sceneName}"), false, LoadSceneWithGuid, sceneGuid);
-                }
-            }
+            _sceneList = Utility.GenerateSceneLists();
         }
 
         private static void LoadSceneWithGuid(object sceneGuid)
