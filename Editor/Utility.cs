@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Unity.Plastic.Newtonsoft.Json;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEngine;
 
 namespace QuickScenes
 {
@@ -65,7 +65,7 @@ namespace QuickScenes
 		// Create favorites list text file
 		public static void CreateSavedDataFile()
 		{
-			string jsonData = JsonConvert.SerializeObject(new SavedData());
+			string jsonData = JsonUtility.ToJson(new SavedData());
 			System.IO.File.WriteAllText("QuickScenesData.json", jsonData);
 		}
 		
@@ -74,7 +74,7 @@ namespace QuickScenes
 		{
 			string fileText = System.IO.File.ReadAllText("QuickScenesData.json");
 			// read string array from json file
-			SavedData favoritesList = JsonConvert.DeserializeObject<SavedData>(fileText);
+			SavedData favoritesList = JsonUtility.FromJson<SavedData>(fileText);
 			return favoritesList;
 		}
 		
@@ -112,7 +112,7 @@ namespace QuickScenes
 
 		private static void WriteToJsonFile(SavedData savedData)
 		{
-			string updatedData = JsonConvert.SerializeObject(savedData, Formatting.Indented);
+			string updatedData = JsonUtility.ToJson(savedData, true);
 			System.IO.File.WriteAllText("QuickScenesData.json", updatedData);
 		}
 
