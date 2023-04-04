@@ -28,6 +28,11 @@ namespace QuickScenes
             ToolbarExtender.LeftToolbarGUI.Add(OnToolbarGUI);
             InitSceneMenu();
             _cachedData = Utility.GetSavedData();
+            
+            if (!System.IO.File.Exists("QuickScenesData.json"))
+            {
+                Utility.CreateSavedDataFile();
+            }
         }
 
         static void OnToolbarGUI()
