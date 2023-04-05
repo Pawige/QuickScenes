@@ -33,6 +33,7 @@ namespace QuickScenes
             {
                 Utility.CreateSavedDataFile();
             }
+            _cachedData = Utility.GetSavedData();
         }
 
         static void OnToolbarGUI()
@@ -64,7 +65,7 @@ namespace QuickScenes
 
             string sceneGuid = AssetDatabase.AssetPathToGUID(SceneManager.GetActiveScene().path);
             bool activeSceneIsFavorite = _cachedData.FavoriteScenes.Contains(new SceneData { SceneName = SceneManager.GetActiveScene().name, SceneGuid = sceneGuid });
-            if (GUILayout.Button(activeSceneIsFavorite ? _favoriteContent : _notFavoriteContent, ToolbarStyles.iconButtonStyle))
+            if (GUILayout.Button(activeSceneIsFavorite ? _favoriteContent : _notFavoriteContent, ToolbarStyles.toolbarButtonStyle))
             {
                 if (activeSceneIsFavorite)
                 {

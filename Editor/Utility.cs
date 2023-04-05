@@ -72,6 +72,10 @@ namespace QuickScenes
 		// Read favorites list text file
 		public static SavedData GetSavedData()
 		{
+			if (!System.IO.File.Exists("QuickScenesData.json"))
+			{
+				CreateSavedDataFile();
+			}
 			string fileText = System.IO.File.ReadAllText("QuickScenesData.json");
 			// read string array from json file
 			SavedData favoritesList = JsonUtility.FromJson<SavedData>(fileText);

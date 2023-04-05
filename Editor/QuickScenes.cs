@@ -17,6 +17,7 @@ namespace QuickScenes
 		private GUIContent _notFavorite;
 		private GUIContent _shown;
 		private GUIContent _hidden;
+		private GUIContent _trash;
 		private SavedData _cachedData;
 		private GUILayoutOption[] _buttonLayoutOptions;
 		
@@ -39,12 +40,14 @@ namespace QuickScenes
 			Texture notFavoriteIcon = (Texture)EditorGUIUtility.Load("Packages/com.paulgerla.quickscenes/Editor/Images/Star_Outline.tga");
 			Texture shownIcon = (Texture)EditorGUIUtility.Load("Packages/com.paulgerla.quickscenes/Editor/Images/Eye.tga");
 			Texture hiddenIcon = (Texture)EditorGUIUtility.Load("Packages/com.paulgerla.quickscenes/Editor/Images/NoEye.tga");
-			_favorite = new GUIContent(favoriteIcon);
-			_notFavorite = new GUIContent(notFavoriteIcon);
-			_shown = new GUIContent(shownIcon);
-			_hidden = new GUIContent(hiddenIcon);
+			Texture trashIcon = (Texture)EditorGUIUtility.Load("Packages/com.paulgerla.quickscenes/Editor/Images/Trash.tga");
+			_favorite = new GUIContent(favoriteIcon, "Remove this scene from favorites list.");
+			_notFavorite = new GUIContent(notFavoriteIcon, "Add this scene to favorites list.");
+			_shown = new GUIContent(shownIcon, "Add this scene to hidden list.");
+			_hidden = new GUIContent(hiddenIcon, "Remove this scene from hidden list.");
+			_trash = new GUIContent(trashIcon, "Remove this scene from the quick access list.");
 
-			_buttonLayoutOptions = new[] { GUILayout.Height(EditorGUIUtility.singleLineHeight - 2), GUILayout.Width(20) };
+			_buttonLayoutOptions = new[] { GUILayout.Width(20) };
 			
 			_sceneFolders = Utility.GenerateSceneLists();
 			AssetDatabase.FindAssets("t:scene", new[] { "Assets/Scenes" });
@@ -80,7 +83,7 @@ namespace QuickScenes
 				bool enableButton = i < _quickSceneAccessList.Count && _quickSceneAccessList[i] != null;
 				EditorGUI.BeginDisabledGroup(!enableButton);
 				
-				if (GUILayout.Button("Load Scene", GUILayout.Width(150)))
+				if (GUILayout.Button("Load", GUILayout.Width(60)))
 				{
 					if (_quickSceneAccessList[i] == null)
 						ShowNotification(new GUIContent("No scene asset selected. Please select a scene to load."));
@@ -88,6 +91,16 @@ namespace QuickScenes
 					{
 						string assetPath = AssetDatabase.GetAssetPath(_quickSceneAccessList[i]);
 						Utility.LoadScene(assetPath);
+					}
+				}
+				if (GUILayout.Button("Add", GUILayout.Width(60)))
+				{
+					if (_quickSceneAccessList[i] == null)
+						ShowNotification(new GUIContent("No scene asset selected. Please select a scene to add."));
+					else
+					{
+						string assetPath = AssetDatabase.GetAssetPath(_quickSceneAccessList[i]);
+						Utility.AddScene(assetPath);
 					}
 				}
 				EditorGUI.EndDisabledGroup();
@@ -104,7 +117,12 @@ namespace QuickScenes
 				{
 					_quickSceneAccessList[i] = (SceneAsset)EditorGUILayout.ObjectField(_quickSceneAccessList[i], typeof(SceneAsset), false);
 				}
-
+				EditorGUI.BeginDisabledGroup(!enableButton);
+				if (GUILayout.Button(_trash, ToolbarStyles.iconButtonStyle, _buttonLayoutOptions))
+				{
+					_quickSceneAccessList.RemoveAt(i);
+				}
+				EditorGUI.EndDisabledGroup();
 				GUILayout.EndHorizontal();
 			}
 
