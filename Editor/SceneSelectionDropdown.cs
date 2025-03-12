@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
@@ -13,26 +12,34 @@ namespace QuickScenes
 
 		private readonly List<SceneFolder> _folderList;
 		private Dictionary<AdvancedDropdownItem, string> _scenes;
-		private string DropdownTitle;
+		private readonly string _dropdownTitle;
 		private readonly SavedData _cachedData;
+		
+		private const int MAXIMUM_VIEW_COUNT = 50;
 
 		public SceneSelectionDropdown(AdvancedDropdownState state, string title, List<SceneFolder> folderList) : base(state)
 		{
 			_folderList = folderList;
 			_cachedData = Utility.GetSavedData();
-			minimumSize = new Vector2(minimumSize.x, CalculateNeededHeight(folderList));
-			DropdownTitle = title;
+			int favoritesCount = _cachedData.FavoriteScenes.Count;
+			int largestViewCount = Mathf.Max(_folderList.Count + 3 + favoritesCount);
+			foreach (SceneFolder sceneFolder in _folderList)
+			{
+				largestViewCount = Mathf.Max(largestViewCount, sceneFolder.SceneGuids.Count + 3);
+			}
+			largestViewCount = Mathf.Min(largestViewCount, MAXIMUM_VIEW_COUNT);
+			minimumSize = new Vector2(minimumSize.x, CalculateNeededHeight(largestViewCount));
+			_dropdownTitle = title;
 		}
 
-		private float CalculateNeededHeight(ICollection folderList)
+		private float CalculateNeededHeight(int longestList)
 		{
-			int favoritesCount = Utility.GetSavedData().FavoriteScenes.Count;
-			return EditorGUIUtility.singleLineHeight * (folderList.Count + 3 + favoritesCount);
+			return EditorGUIUtility.singleLineHeight * longestList;
 		}
 
 		protected override AdvancedDropdownItem BuildRoot()
 		{
-			var root = new AdvancedDropdownItem(DropdownTitle);
+			var root = new AdvancedDropdownItem(_dropdownTitle);
 
 			_scenes = new Dictionary<AdvancedDropdownItem, string>();
 			foreach (SceneData favoriteScene in _cachedData.FavoriteScenes)
