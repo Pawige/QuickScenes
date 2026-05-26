@@ -18,7 +18,6 @@ namespace QuickScenes
 		private GUIContent _shown;
 		private GUIContent _hidden;
 		private GUIContent _trash;
-		private SavedData _cachedData;
 		private GUILayoutOption[] _buttonLayoutOptions;
 		
 		[MenuItem("Window/Quick Scenes")]
@@ -29,12 +28,7 @@ namespace QuickScenes
 
 		private void OnEnable()
 		{
-			// try to load favorites list and create one if it doesn't exist
-			if (!System.IO.File.Exists("QuickScenesData.json"))
-			{
-				Utility.CreateSavedDataFile();
-			}
-			_cachedData = Utility.GetSavedData();
+			Utility.GetSavedData();
 
 			Texture favoriteIcon = (Texture)EditorGUIUtility.Load("Packages/com.paulgerla.quickscenes/Editor/Images/Star.tga");
 			Texture notFavoriteIcon = (Texture)EditorGUIUtility.Load("Packages/com.paulgerla.quickscenes/Editor/Images/Star_Outline.tga");
@@ -49,7 +43,7 @@ namespace QuickScenes
 
 			_buttonLayoutOptions = new[] { GUILayout.Width(20) };
 			
-			_sceneFolders = Utility.GenerateSceneLists();
+			_sceneFolders = Utility.GetSceneFolders();
 			AssetDatabase.FindAssets("t:scene", new[] { "Assets/Scenes" });
 			titleContent = new GUIContent("Quick Scenes");
 		}
@@ -59,12 +53,6 @@ namespace QuickScenes
 			if (EditorApplication.isPlaying)
 				return;
 
-			if (Utility.DirtyFromToolbar)
-			{
-				Utility.DirtyFromToolbar = false;
-				_cachedData = Utility.GetSavedData();
-			}
-			
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Quick Scene Access", EditorStyles.boldLabel);
 			GUI.skin.button.fontStyle = FontStyle.Bold;
@@ -132,12 +120,15 @@ namespace QuickScenes
 			GUILayout.FlexibleSpace();
 			if (GUILayout.Button("Refresh", GUILayout.Width(100)))
 			{
-				_sceneFolders = Utility.GenerateSceneLists();
+				_sceneFolders = Utility.RefreshSceneFolders();
 			}
 			GUILayout.EndHorizontal();
 			
 			if (_sceneFolders == null)
 				return;
+
+			HashSet<string> hiddenSceneGuids = Utility.GetHiddenSceneGuids();
+			HashSet<string> favoriteSceneGuids = Utility.GetFavoriteSceneGuids();
 
 			_scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
 			foreach (SceneFolder sceneFolder in _sceneFolders)
@@ -149,11 +140,11 @@ namespace QuickScenes
 				if (!sceneFolder.FolderOpen)
 					continue;
 
-				foreach (string guid in sceneFolder.SceneGuids)
+				for (var i = 0; i < sceneFolder.SceneGuids.Count; i++)
 				{
-					string path = AssetDatabase.GUIDToAssetPath(guid);
-					string[] scenePathSplit = path.Split('/', '.');
-					string sceneName = scenePathSplit[scenePathSplit.Length - 2];
+					string guid = sceneFolder.SceneGuids[i];
+					string path = sceneFolder.ScenePaths[i];
+					string sceneName = sceneFolder.SceneNames[i];
 
 					EditorGUILayout.BeginHorizontal();
 					if (SceneManager.GetActiveScene().name != sceneName)
@@ -181,26 +172,22 @@ namespace QuickScenes
 						Selection.activeObject = AssetDatabase.LoadMainAssetAtPath(path);
 					}
 
-					bool isHidden = _cachedData.HiddenScenes.Contains(new SceneData { SceneName = sceneName, SceneGuid = guid });
+					bool isHidden = hiddenSceneGuids.Contains(guid);
 					if (GUILayout.Button(isHidden ? _hidden : _shown, ToolbarStyles.iconButtonStyle, _buttonLayoutOptions))
 					{
 						if (isHidden)
 							Utility.RemoveFromHiddenList(sceneName, guid);
 						else
 							Utility.AddToHiddenList(sceneName, guid);
-						_cachedData = Utility.GetSavedData();
-						Utility.DirtyFromWindow = true;
 					}
 					
-					bool isFavorite = _cachedData.FavoriteScenes.Contains(new SceneData { SceneName = sceneName, SceneGuid = guid });
+					bool isFavorite = favoriteSceneGuids.Contains(guid);
 					if (GUILayout.Button(isFavorite ? _favorite : _notFavorite, ToolbarStyles.iconButtonStyle, _buttonLayoutOptions))
 					{
 						if (isFavorite)
 							Utility.RemoveFavorite(sceneName, guid);
 						else
 							Utility.AddFavorite(sceneName, guid);
-						_cachedData = Utility.GetSavedData();
-						Utility.DirtyFromWindow = true;
 					}
 					EditorGUILayout.EndHorizontal();
 					// Draw buttons to hide all and show all scenes
@@ -211,14 +198,10 @@ namespace QuickScenes
 			if (GUILayout.Button("Set All Scenes Hidden"))
 			{
 				Utility.HideAllScenes();
-				_cachedData = Utility.GetSavedData();
-				Utility.DirtyFromWindow = true;
 			}
 			if (GUILayout.Button("Set All Scenes Shown"))
 			{
 				Utility.ShowAllScenes();
-				_cachedData = Utility.GetSavedData();
-				Utility.DirtyFromWindow = true;
 			}
 			EditorGUILayout.EndHorizontal();
 			EditorGUILayout.EndScrollView();

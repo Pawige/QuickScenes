@@ -1,1 +1,1 @@
-ToolbarCallback.cs and ToolbarExtender.cs borrowed from Marijn Zwemmer's Unity Toolbar Extender: https://github.com/marijnz/unity-toolbar-extender
+Quick Scenes now targets Unity 6.4's `UnityEditor.Toolbars.MainToolbar` API instead of the older reflection-based toolbar extender approach.

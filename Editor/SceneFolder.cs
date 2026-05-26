@@ -7,6 +7,7 @@ namespace QuickScenes
 		public string FolderName;
 		public List<string> SceneGuids;
 		public List<string> SceneNames;
+		public List<string> ScenePaths;
 		public bool FolderOpen;
 	}
 }
