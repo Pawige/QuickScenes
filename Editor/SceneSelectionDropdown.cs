@@ -107,9 +107,13 @@ namespace QuickScenes
 
 		private static void AddEmptyState(AdvancedDropdownItem root)
 		{
+#if UNITY_6000_5
 			if (root.childList.Any())
 				return;
-
+#else 
+			if (root.children.Any())
+				return;
+#endif
 			var emptyItem = new AdvancedDropdownItem("No visible scenes found")
 			{
 				enabled = false
