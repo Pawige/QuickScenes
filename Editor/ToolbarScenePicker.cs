@@ -141,8 +141,21 @@ namespace QuickScenes
             }
 
             _dropdownSelectionMenu = new SceneSelectionDropdown(new AdvancedDropdownState(), title, _sceneList);  
-            _dropdownSelectionMenu.SelectionMade += SelectionMade;  
-            _dropdownSelectionMenu.Show(dropdownRect);  
+            _dropdownSelectionMenu.SelectionMade += SelectionMade;
+            _dropdownSelectionMenu.Show(dropdownRect);
+            
+            // MainToolbar callbacks can run with GameSkin active, but AdvancedDropdown
+            // requires editor-only styles such as DD ItemStyle and DD HeaderStyle.
+            /*GUISkin previousSkin = GUI.skin;
+            try
+            {
+                GUI.skin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector);
+                _dropdownSelectionMenu.Show(dropdownRect);
+            }
+            finally
+            {
+                GUI.skin = previousSkin;
+            }*/
         }  
   
         private static void SelectionMade(string selectedSceneGuid)  
