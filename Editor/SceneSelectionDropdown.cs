@@ -107,7 +107,7 @@ namespace QuickScenes
 
 		private static void AddEmptyState(AdvancedDropdownItem root)
 		{
-#if UNITY_6000_5
+#if UNITY_6000_5_OR_NEWER
 			if (root.childList.Any())
 				return;
 #else 
